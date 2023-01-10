@@ -1,17 +1,19 @@
 import { useEffect, useState } from 'react'
 
-export const isFalsy = (value) => (value === 0 ? false : !value)
+export const isFalsy = (value: any) => (value === 0 ? false : !value)
 
 // 把对象里值为空的键直接删掉，这样url中不再携带非必要的
 // 还会产生find效果的key
 
 // 应该写成纯函数，防止污染
-export const cleanObject = (obj) => {
+export const cleanObject = (obj: object) => {
     const result = { ...obj }
     Object.keys(obj).forEach((key) => {
+        // @ts-ignore
         const value = obj[key]
 
         if (isFalsy(value)) {
+            // @ts-ignore
             delete result[key]
         }
     })
@@ -19,7 +21,7 @@ export const cleanObject = (obj) => {
     return result
 }
 
-export const useMount = (callback) => {
+export const useMount = (callback: () => void) => {
     useEffect(() => {
         callback()
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -28,7 +30,8 @@ export const useMount = (callback) => {
 
 // 对监听value的useEffect，设置一个取消定时器的回调，于是
 // 基本上只有最后一次才不会被取消
-export const useDebounce = (value, delay) => {
+// setTimeout不传delay默认是0，所以可以不传
+export const useDebounce = (value: any, delay?: number) => {
     // debounceValue的更新频率比value小
     const [debouncedValue, setDebouncedValue] = useState(value)
     useEffect(() => {
