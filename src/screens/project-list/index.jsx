@@ -23,7 +23,7 @@ export const ProjectListScreen = () => {
                 setList(await response.json())
             }
         })
-    },[param])
+    },[param,apiUrl])
 
     // 初始化users,由于只触发一次，第二个参数为空数组
     useEffect(()=>{
@@ -32,7 +32,7 @@ export const ProjectListScreen = () => {
                 setUsers(await response.json())
             }
         })
-
+  // eslint-disable-next-line react-hooks/exhaustive-deps
     },[])
 
 
