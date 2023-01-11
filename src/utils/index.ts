@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-export const isFalsy = (value: any) => (value === 0 ? false : !value)
+export const isFalsy = (value: unknown) => (value === 0 ? false : !value)
 
 // 把对象里值为空的键直接删掉，这样url中不再携带非必要的
 // 还会产生find效果的key
@@ -31,7 +31,7 @@ export const useMount = (callback: () => void) => {
 // 对监听value的useEffect，设置一个取消定时器的回调，于是
 // 基本上只有最后一次才不会被取消
 // setTimeout不传delay默认是0，所以可以不传
-export const useDebounce = (value: any, delay?: number) => {
+export const useDebounce = <T>(value: T, delay?: number): T => {
     // debounceValue的更新频率比value小
     const [debouncedValue, setDebouncedValue] = useState(value)
     useEffect(() => {
