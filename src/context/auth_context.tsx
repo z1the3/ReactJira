@@ -1,10 +1,23 @@
 import React, { ReactNode, useState } from 'react'
+import { useMount } from 'utils'
+import { http } from 'utils/http'
 import * as auth from '../auth_provider'
 import { User } from '../screens/project-list/search-panel'
 
 interface AuthForm {
     username: string
     password: string
+}
+
+const bootstrapUser = async () => {
+    let user = null
+    const token = auth.getToken()
+    if (token) {
+        // 带着token,去me接口找user信息，最后把user信息交给setUser
+        const data = await http('me', { token })
+        user = data.user
+    }
+    return user
 }
 
 const AuthContext = React.createContext<
@@ -26,6 +39,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const register = (form: AuthForm) => auth.register(form).then(setUser)
     const logout = () => auth.logout().then(() => setUser(null))
 
+    // 页面加载时调用初始化
+    useMount(() => {
+        bootstrapUser().then(setUser)
+    })
     // 为context创造value
     return (
         <AuthContext.Provider value={{ user, login, register, logout }}>
@@ -35,7 +52,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 }
 
 export const useAuth = () => {
-    // 可以拿到该组件外面的context
+    // 可以拿到该组件外面的context,由于里面用了hooks，所以该函数也要是hooks
     const context = React.useContext(AuthContext)
     if (!context) {
         throw new Error('useAuth必须在AuthProvider中')

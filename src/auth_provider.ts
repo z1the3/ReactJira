@@ -7,7 +7,7 @@ const localStorageKey = '__auth_provider_token__'
 
 // 获取token
 export const getToken = () => {
-    window.localStorage.getItem(localStorageKey)
+    return window.localStorage.getItem(localStorageKey)
 }
 
 // 拦截器

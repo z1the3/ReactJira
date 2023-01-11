@@ -3,6 +3,7 @@ import { LoginScreen } from './login'
 import { RegisterScreen } from './register'
 
 export const UnauthenticatedApp = () => {
+    // 切换登录注册页
     const [isRegister, setIsRegister] = useState(false)
 
     return (
