@@ -5,8 +5,8 @@ import styled from '@emotion/styled'
 
 export const AuthenticatedApp = ()=>{
     const {logout} = useAuth()
-    return <div>
-        <PageHeader>
+    return <Container>
+        <Header>
             <HeaderLeft>
                 <h3>logo</h3>
                 <h3>项目</h3>
@@ -15,23 +15,31 @@ export const AuthenticatedApp = ()=>{
             <HeaderRight>
                 <button onClick={logout}>登出</button>
             </HeaderRight>
-        </PageHeader>
+        </Header>
+
         <Main>
             <ProjectListScreen></ProjectListScreen>
         </Main>
-    </div>
+    </Container>
 }
 
-const PageHeader = styled.header`
-    height: 6rem;
+const Container = styled.div`
+    display: grid;
+    grid-template-rows: 6rem 1fr;
+    grid-template-areas: 
+    "header"
+    "main";
+`
+const Header = styled.header`
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+    grid-area: header;
 `
 
 const Main = styled.main`
-    height:calc(100vh - 6rem);
+    grid-area: main;
 `
 
 const HeaderLeft = styled.div`
