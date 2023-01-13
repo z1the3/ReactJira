@@ -5,6 +5,8 @@ import App from './App'
 import reportWebVitals from './reportWebVitals'
 import { loadDevTools } from 'jira-dev-tool'
 import { AppProviders } from './context'
+// 务必在jira-dev-tool后面引入，防止jira-dev-tool中用的antd覆盖
+import 'antd'
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 loadDevTools(() => {
