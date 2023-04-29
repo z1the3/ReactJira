@@ -1,5 +1,6 @@
 // 在真实环境中，如果使用firebase这种第三方auth服务或SDK，本文件不需要开发者开发
-import { User } from './screens/project-list/search-panel'
+import { User } from 'types'
+
 const apiUrl = process.env.REACT_APP_API_URL
 
 // 这里用localstorage存储jwt
@@ -27,7 +28,7 @@ export const login = (param: { username: string; password: string }) => {
         if (response.ok) {
             return handleUserResponse(await response.json())
         } else {
-            return Promise.reject(param)
+            return Promise.reject(await response.json())
         }
     })
 }
@@ -43,7 +44,7 @@ export const register = (param: { username: string; password: string }) => {
         if (response.ok) {
             return handleUserResponse(await response.json())
         } else {
-            return Promise.reject(param)
+            return Promise.reject(await response.json())
         }
     })
 }

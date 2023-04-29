@@ -1,8 +1,9 @@
 import React, { ReactNode, useState } from 'react'
+import { useQueryClient } from 'react-query'
 import { useMount } from 'utils'
 import { http } from 'utils/http'
 import * as auth from '../auth_provider'
-import { User } from '../screens/project-list/search-panel'
+import { User } from 'types'
 
 interface AuthForm {
     username: string
@@ -33,11 +34,17 @@ AuthContext.displayName = 'AuthContext'
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<User | null>(null)
+    // 退出登录时要清空缓存
+    const queryClient = useQueryClient()
 
     // 等同于.then((data)=>setUser(data))
     const login = (form: AuthForm) => auth.login(form).then(setUser)
     const register = (form: AuthForm) => auth.register(form).then(setUser)
-    const logout = () => auth.logout().then(() => setUser(null))
+    const logout = () =>
+        auth.logout().then(() => {
+            setUser(null)
+            queryClient.clear()
+        })
 
     // 页面加载时调用初始化
     useMount(() => {

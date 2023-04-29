@@ -1,19 +1,18 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 export const isFalsy = (value: unknown) => (value === 0 ? false : !value)
 
+export const isVoid = (value: unknown) =>
+    value === undefined || value === null || value === ''
 // 把对象里值为空的键直接删掉，这样url中不再携带非必要的
 // 还会产生find效果的key
 
 // 应该写成纯函数，防止污染
-export const cleanObject = (obj: object) => {
+export const cleanObject = (obj: { [key: string]: unknown }) => {
     const result = { ...obj }
     Object.keys(obj).forEach((key) => {
-        // @ts-ignore
         const value = obj[key]
-
-        if (isFalsy(value)) {
-            // @ts-ignore
+        if (isVoid(value)) {
             delete result[key]
         }
     })
@@ -47,4 +46,41 @@ export const useDebounce = <T>(value: T, delay?: number): T => {
 
     // 以新频率return value
     return debouncedValue
+}
+
+// 修改文档名
+export const useDocumentTitle = (
+    title: string,
+    keepOnUnmount: boolean = true
+) => {
+    const oldTitle = useRef(document.title).current
+    useEffect(() => {
+        document.title = title
+    }, [title])
+
+    // 卸载时调用，为了清除状态
+    useEffect(() => {
+        return () => {
+            if (!keepOnUnmount) {
+                document.title = oldTitle
+            }
+        }
+    }, [keepOnUnmount, oldTitle])
+}
+
+// 重置路由
+export const resetRoute = () => (window.location.href = window.location.origin)
+
+// 返回组件内的挂载状态，如果还没挂载或者已经卸载，返回false,否则返回true
+
+export const useMountedRef = () => {
+    const monuntedRef = useRef(false)
+    useEffect(() => {
+        monuntedRef.current = true
+        return () => {
+            monuntedRef.current = false
+        }
+    })
+
+    return monuntedRef
 }

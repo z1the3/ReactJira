@@ -1,27 +1,28 @@
-import { Input } from 'antd'
-import Select from 'antd/es/select'
+/** @jsxRuntime classic */
+/** @jsx jsx */
+import { jsx } from '@emotion/react'
+import { Form, Input } from 'antd'
 import { useEffect, useState } from 'react'
-export interface User {
-    id: string
-    name: string
-    email: string
-    title: string
-    organization: string
-    token: string
-}
+import { UserSelect } from 'components/user-select'
+import { Project } from 'types'
+import { User } from 'types'
+
 interface SearchPanelProps {
     users: User[]
-    param: {
-        name: string
-        personId: string
-    }
+    // 改用工具类型
+    param: Partial<Pick<Project, 'name' | 'personId'>>
+    // param: {
+    //     name: string
+    //     personId: string
+    // }
     setParam: (param: SearchPanelProps['param']) => void
 }
 export const SearchPanel = ({ param, setParam, users }: SearchPanelProps) => {
     return (
-        <form>
-            <div>
+        <Form style={{ marginBottom: '2rem' }} layout="inline">
+            <Form.Item>
                 <Input
+                    placeholder="项目名"
                     type="text"
                     value={param.name}
                     onChange={(evt) => {
@@ -32,8 +33,9 @@ export const SearchPanel = ({ param, setParam, users }: SearchPanelProps) => {
                         })
                     }}
                 />
-
-                <Select
+            </Form.Item>
+            <Form.Item>
+                <UserSelect
                     value={param.personId}
                     onChange={(value) => {
                         setParam({
@@ -41,17 +43,9 @@ export const SearchPanel = ({ param, setParam, users }: SearchPanelProps) => {
                             personId: value,
                         })
                     }}
-                >
-                    <Select.Option value={''}>负责人</Select.Option>
-                    {users.map((user, id) => {
-                        return (
-                            <Select.Option value={user.id} key={user.id}>
-                                {user.name}
-                            </Select.Option>
-                        )
-                    })}
-                </Select>
-            </div>
-        </form>
+                    defaultOptionName={'负责人'}
+                ></UserSelect>
+            </Form.Item>
+        </Form>
     )
 }

@@ -1,19 +1,40 @@
-import { Table } from 'antd'
-import { User } from './search-panel'
+import { Table, TableProps, Dropdown, Button, Menu, MenuProps } from 'antd'
+import { Link } from 'react-router-dom'
+import dayjs from 'dayjs'
+import { User } from 'types'
+import { useEditProject } from 'utils/project'
+import { Pin } from 'components/pin'
+import { useProjectModal } from './util'
 
-interface Project {
-    id: string
+// TODO 把所有ID改成number类型
+export interface Project {
+    id: number
     name: string
-    personId: string
+    personId: number
     pin: boolean
+    created: number
+    organization: string
 }
 
-interface ListProps {
+interface ListProps extends TableProps<Project> {
     list: Project[]
     users: User[]
+    // projectButton: JSX.Element;
 }
 
-export const List = ({ list, users }: ListProps) => {
+export const List = ({ list, users, ...props }: ListProps) => {
+    const { mutate } = useEditProject()
+    const pinProject = (id: number) => (pin: boolean) => mutate({ id, pin })
+    const deleteProject = (id: number) => () => mutate({})
+    const editProject = (id: number) => () => startEdit(id)
+    const [
+        projectModalOpen,
+        open,
+        close,
+        startEdit,
+        editingProject,
+        isLoading,
+    ] = useProjectModal()
     // localeCompare可以比较中文字符
     // 负责人对于的每一列id不能通过dataIndex简单找到，需要使用render
     return (
@@ -22,22 +43,105 @@ export const List = ({ list, users }: ListProps) => {
             dataSource={list}
             columns={[
                 {
+                    title: <Pin checked={true} disabled={true} />,
+                    render(value, project) {
+                        return (
+                            <Pin
+                                checked={project.pin}
+                                key={project.id}
+                                onCheckedChange={
+                                    // 这里由于project.id和pin拿到的时机不同
+                                    // 所以可以用柯里化优化
+                                    pinProject(project.id)
+                                }
+                            />
+                        )
+                    },
+                },
+                {
                     title: '名称',
-                    dataIndex: 'name',
                     sorter: (a, b) => a.name.localeCompare(b.name),
+                    render: (value, project) => {
+                        return (
+                            <Link
+                                key={project.id}
+                                to={`projects/${String(project.id)}`}
+                            >
+                                {project.name}
+                            </Link>
+                        )
+                    },
+                },
+                {
+                    title: '所属',
+                    dataIndex: 'organization',
+                    render: (value, project) => {
+                        return (
+                            <span key={project.id}>
+                                {list.find((li) => li.id === project.id)
+                                    ?.organization || '未知'}
+                            </span>
+                        )
+                    },
                 },
                 {
                     title: '负责人',
-                    render(value, item) {
+                    render: (value, item) => {
                         return (
-                            <span>
+                            <span key={item.id}>
                                 {users.find((user) => user.id === item.personId)
                                     ?.name || '未知'}
                             </span>
                         )
                     },
                 },
+                {
+                    title: '创建时间',
+                    render: (value, project) => {
+                        return (
+                            <span key={project.id}>
+                                {project.created
+                                    ? dayjs(project.created).format(
+                                          'YYYY/MM/DD'
+                                      )
+                                    : '无'}
+                            </span>
+                        )
+                    },
+                },
+                {
+                    render(value, record, index) {
+                        return (
+                            <Dropdown
+                                key={record.id}
+                                menu={
+                                    (
+                                        <Menu>
+                                            <Menu.Item
+                                                onClick={editProject(record.id)}
+                                                key={'edit'}
+                                            >
+                                                编辑
+                                            </Menu.Item>
+                                            <Menu.Item
+                                                onClick={deleteProject(
+                                                    record.id
+                                                )}
+                                                key={'delete'}
+                                            >
+                                                删除
+                                            </Menu.Item>
+                                        </Menu>
+                                    ) as MenuProps
+                                }
+                            >
+                                <Button type={'link'}>...</Button>
+                            </Dropdown>
+                        )
+                    },
+                },
             ]}
+            {...props}
         ></Table>
     )
 }

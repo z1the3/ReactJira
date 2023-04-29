@@ -1,19 +1,32 @@
-import { Button, Card, Divider } from 'antd'
+import { Button, Card, Divider, Typography } from 'antd'
 import { useState } from 'react'
 import { LoginScreen } from './login'
 import { RegisterScreen } from './register'
 import styled from '@emotion/styled'
+import { useDocumentTitle } from 'utils'
+import { ErrorBox } from 'components/lib'
 
 export const UnauthenticatedApp = () => {
     // 切换登录注册页
     const [isRegister, setIsRegister] = useState(false)
+    // 错误处理的状态
+    // 由登录和注册组件抛出错误状态
+    const [error, setError] = useState<Error | null>(null)
+
+    useDocumentTitle('请登录或注册以继续')
 
     return (
         <Container>
             <Header>JIRA</Header>
             <ShadowCard>
                 <Title>{isRegister ? '请注册' : '请登录'}</Title>
-                {isRegister ? <RegisterScreen /> : <LoginScreen />}
+                {/* {error?<Typography.Text type={'danger'}>{error.message}</Typography.Text>:null} */}
+                <ErrorBox error={error}></ErrorBox>
+                {isRegister ? (
+                    <RegisterScreen setError={setError} />
+                ) : (
+                    <LoginScreen setError={setError} />
+                )}
                 <Divider></Divider>
                 <a onClick={() => setIsRegister(!isRegister)}>
                     {!isRegister ? '注册' : '已经有账号了？登录'}
