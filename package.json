@@ -40,7 +40,7 @@
     "eject": "react-scripts eject",
     "prepare": "husky install",
     "predepoly": "npm run build",
-    "deploy": "gh-pages -d build -r"
+    "deploy": "gh-pages -d build -r git@github.com:z1the3/z1the3jira.github.io.git -b main"
   },
   "eslintConfig": {
     "extends": [
