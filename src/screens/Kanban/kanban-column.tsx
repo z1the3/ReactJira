@@ -25,9 +25,9 @@ const TaskTypeIcon = ({ id }: { id: number }) => {
     return (
         <div style={{ margin: '2rem', display: 'inline' }}>
             {name === 'task' ? (
-                <div style={{ color: 'blue', display: 'inline' }}>T</div>
+                <div style={{ color: 'blue', display: 'inline' }}>任务</div>
             ) : (
-                <div style={{ color: 'red', display: 'inline' }}>B</div>
+                <div style={{ color: 'red', display: 'inline' }}>Bug</div>
             )}
         </div>
     )
@@ -42,6 +42,7 @@ const TaskCard = ({ task }: { task: Task }) => {
             style={{ marginBottom: '0.5rem', cursor: 'pointer' }}
             key={task.id}
         >
+            {task.id}
             <Mark name={task.name} keyword={keyword}></Mark>
 
             <TaskTypeIcon id={task.typeId}></TaskTypeIcon>
@@ -61,28 +62,15 @@ const More = ({ kanban }: { kanban: Kanban }) => {
             },
         })
     }
-    const overlay = (
-        <Menu>
-            <Menu.Item>
-                <Button type={'link'} onClick={startDelete}>
-                    删除
-                </Button>
-            </Menu.Item>
-        </Menu>
-    )
 
-    return (
-        <Dropdown overlay={overlay}>
-            <Button type={'link'}>...</Button>
-        </Dropdown>
-    )
+    return <a onClick={startDelete}>...</a>
 }
 
 export const KanbanColumn = React.forwardRef<
     HTMLDivElement,
     { kanban: Kanban }
 >(({ kanban, ...props }: { kanban: Kanban }, ref) => {
-    const { data: allTasks } = useTasks(useTasksSearchParamsPanels(kanban.id))
+    const { data: allTasks } = useTasks(useTasksSearchParamsPanels())
 
     const tasks = allTasks?.filter((task) => task.kanbanId === kanban.id)
     return (
@@ -99,16 +87,21 @@ export const KanbanColumn = React.forwardRef<
                 >
                     <DropChild
                         flexD={'vertical'}
-                        style={{ display: 'flex', flexDirection: 'column' }}
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            minHeight: '50px',
+                        }}
                     >
+                        <br></br>
                         {tasks?.map((task, index) => (
-                            <Drag
-                                key={task.id}
-                                index={index}
-                                draggableId={'task' + task.id}
-                            >
-                                <TaskCard key={task.id} task={task}></TaskCard>
-                            </Drag>
+                            // <Drag
+                            //     key={task.id}
+                            //     index={index}
+                            //     draggableId={'task' + task.id}
+                            // >
+                            <TaskCard key={task.id} task={task}></TaskCard>
+                            // {/* </Drag> */}
                         ))}
                     </DropChild>
                 </Drop>

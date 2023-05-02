@@ -2,7 +2,7 @@ import { Table, TableProps, Dropdown, Button, Menu, MenuProps } from 'antd'
 import { Link } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { User } from 'types'
-import { useEditProject } from 'utils/project'
+import { useDeleteProject, useEditProject } from 'utils/project'
 import { Pin } from 'components/pin'
 import { useProjectModal } from './util'
 
@@ -24,8 +24,13 @@ interface ListProps extends TableProps<Project> {
 
 export const List = ({ list, users, ...props }: ListProps) => {
     const { mutate } = useEditProject()
-    const pinProject = (id: number) => (pin: boolean) => mutate({ id, pin })
-    const deleteProject = (id: number) => () => mutate({})
+    const { mutate: mutateDelete } = useDeleteProject()
+    const pinProject = (id: number) => {
+        return (pin: boolean) => {
+            mutate({ id, pin })
+        }
+    }
+    const deleteProject = (id: number) => () => mutateDelete({ id })
     const editProject = (id: number) => () => startEdit(id)
     const [
         projectModalOpen,
@@ -35,6 +40,10 @@ export const List = ({ list, users, ...props }: ListProps) => {
         editingProject,
         isLoading,
     ] = useProjectModal()
+
+    // const items: MenuProps['items'] = [
+
+    // ]
     // localeCompare可以比较中文字符
     // 负责人对于的每一列id不能通过dataIndex简单找到，需要使用render
     return (
@@ -43,7 +52,13 @@ export const List = ({ list, users, ...props }: ListProps) => {
             dataSource={list}
             columns={[
                 {
-                    title: <Pin checked={true} disabled={true} />,
+                    title: (
+                        <Pin
+                            onCheckedChange={() => {}}
+                            checked={true}
+                            disabled={true}
+                        />
+                    ),
                     render(value, project) {
                         return (
                             <Pin
@@ -52,6 +67,7 @@ export const List = ({ list, users, ...props }: ListProps) => {
                                 onCheckedChange={
                                     // 这里由于project.id和pin拿到的时机不同
                                     // 所以可以用柯里化优化
+
                                     pinProject(project.id)
                                 }
                             />
@@ -114,26 +130,37 @@ export const List = ({ list, users, ...props }: ListProps) => {
                         return (
                             <Dropdown
                                 key={record.id}
-                                menu={
-                                    (
-                                        <Menu>
-                                            <Menu.Item
-                                                onClick={editProject(record.id)}
-                                                key={'edit'}
-                                            >
-                                                编辑
-                                            </Menu.Item>
-                                            <Menu.Item
-                                                onClick={deleteProject(
-                                                    record.id
-                                                )}
-                                                key={'delete'}
-                                            >
-                                                删除
-                                            </Menu.Item>
-                                        </Menu>
-                                    ) as MenuProps
-                                }
+                                menu={{
+                                    items: [
+                                        {
+                                            key: 1,
+                                            label: (
+                                                <a
+                                                    onClick={editProject(
+                                                        record.id
+                                                    )}
+                                                    key={'edit'}
+                                                >
+                                                    编辑
+                                                </a>
+                                            ),
+                                        },
+
+                                        {
+                                            key: 2,
+                                            label: (
+                                                <a
+                                                    onClick={deleteProject(
+                                                        record.id
+                                                    )}
+                                                    key={'delete'}
+                                                >
+                                                    删除
+                                                </a>
+                                            ),
+                                        },
+                                    ],
+                                }}
                             >
                                 <Button type={'link'}>...</Button>
                             </Dropdown>

@@ -20,7 +20,7 @@
     "antd": "^5.1.4",
     "craco-less": "^2.0.0",
     "dayjs": "^1.11.7",
-    "jira-dev-tool": "^1.7.61",
+    "jira-dev-tool": "^1.6.59",
     "qs": "^6.11.0",
     "react": "^18.2.0",
     "react-beautiful-dnd": "^13.1.1",
@@ -34,13 +34,13 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "craco start",
-    "build": "craco build",
+    "start": "craco start --mode development",
+    "build": "craco build --mode production",
     "test": "craco test",
     "eject": "react-scripts eject",
     "prepare": "husky install",
-    "predepoly": "npm run build",
-    "deploy": "gh-pages -d build -r git@github.com:z1the3/z1the3jira.github.io.git -b main"
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build -r git@github.com:z1the3/z1the3.github.io.git -b main"
   },
   "eslintConfig": {
     "extends": [

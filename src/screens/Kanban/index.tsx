@@ -20,6 +20,7 @@ import { CreatKanban } from './create-kanban'
 import { TaskModal } from './task-modal'
 import { DragDropContext, DropResult } from 'react-beautiful-dnd'
 import { Drag, Drop, DropChild } from 'components/drag-and-drop'
+import { useReorderTaskConfig } from 'utils/use-optimistic-options'
 export const KanbanScreen = () => {
     useDocumentTitle('看板列表')
     const { data: kanbans, isLoading: KanbanIsLoading } = useKanbans(
@@ -28,8 +29,11 @@ export const KanbanScreen = () => {
     const { data: currentProject } = useProjectInUrl()
     // task结果加载
 
+    const queryKey = ['tasks', useTasksSearchParamsPanels()]
+    const reorderTaskConfig = useReorderTaskConfig(queryKey)
     const { isLoading: taskIsLoading } = useTasks(useTasksSearchParamsPanels())
-    const isLoading = taskIsLoading || KanbanIsLoading
+    const isLoading =
+        taskIsLoading || KanbanIsLoading || reorderTaskConfig.loading
 
     const onDragEnd = useDragEnd()
     // console.log(useKanbans())
@@ -37,7 +41,10 @@ export const KanbanScreen = () => {
         // onDragEnd常常用于数据持久化
         <DragDropContext onDragEnd={onDragEnd}>
             <ScreenContainer>
-                <h1>{currentProject?.name} 看板</h1>
+                <h1>
+                    {currentProject?.name} {String(reorderTaskConfig.loading)}
+                    看板
+                </h1>
                 <SearchPanel></SearchPanel>
                 {isLoading ? (
                     <Spin size={'large'}></Spin>
@@ -75,10 +82,12 @@ export const KanbanScreen = () => {
 export const useDragEnd = () => {
     const { data: kanbans } = useKanbans(useKanbanSearchParams())
     const { mutate: reorderKanban } = useReorderKanban()
-    const { mutate: reorderTask } = useReorderTask()
-    const { data: allTasks } = useTasks()
+    const { data: allTasks = [] } = useTasks()
+
+    const { mutate: reorderTask, isLoading } = useReorderTask()
     return useCallback(
-        ({ source, destination, type }: DropResult) => {
+        async ({ source, destination, type }: DropResult) => {
+            console.log(source, destination)
             if (!destination) return
             // 给看板排序
             if (type === 'COLUMN') {
@@ -94,18 +103,21 @@ export const useDragEnd = () => {
                 const fromKanbanId = +source.droppableId
                 const toKanbanId = +destination.droppableId
                 // 不能跨看板移动
-                // if(fromKanbanId!==toKanbanId ) return
+                if (fromKanbanId !== toKanbanId) return
                 const fromTask = allTasks?.filter(
                     (task) => task.kanbanId === fromKanbanId
                 )[source.index]
                 const toTask = allTasks?.filter(
-                    (task) => task.kanbanId === fromKanbanId
+                    (task) => task.kanbanId === toKanbanId
                 )[destination.index]
+                console.log(
+                    allTasks?.filter((task) => task.kanbanId === fromKanbanId)
+                )
                 if (fromKanbanId === toKanbanId && fromTask?.id === toTask?.id)
                     return
-                reorderTask({
-                    fromId: fromTask!.id,
-                    referenceId: toTask!.id,
+                reorderTask?.({
+                    fromId: fromTask?.id,
+                    referenceId: toTask?.id,
                     fromKanbanId,
                     toKanbanId,
                     type: destination.index > source.index ? 'after' : 'before',
@@ -119,9 +131,9 @@ export const useDragEnd = () => {
 export const ColumnsContainer = styled('div')`
     display: flex;
     overflow-x: scroll;
-    /* ::-webkit-scrollbar {
+    ::-webkit-scrollbar {
         display: none;
-    } */
+    }
     justify-content: flex-start;
     flex: 1;
     padding: 2rem;

@@ -50,7 +50,7 @@ export const useTasksSearchParamsPanels = (kanbanId?: number) => {
 // export const useTasksQueryKey = () => ['tasks',useTasksSearchParams()]
 export const useTask = (id?: number) => {
     const client = useHttp()
-    return useQuery<Task>(['task', { id }], () => client(`tasks/${id}`), {
+    return useQuery<Task>(['task', { id }], () => client(`tasks/${id}`, {}), {
         enabled: !!id,
     })
 }

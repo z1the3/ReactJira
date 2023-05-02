@@ -52,6 +52,7 @@ export const useHttp = () => {
     // 因为要从useAuth中获取user，hooks外必须也是hooks
     const { user } = useAuth()
     // 加入token,ts操作符parameters
+
     return (...[endpoint, config]: Parameters<typeof http>) =>
         http(endpoint, { ...config, token: user?.token })
 }

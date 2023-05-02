@@ -3,6 +3,11 @@
 import { useHttp } from 'utils/http'
 import { Kanban, Project } from 'types'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
+import {
+    useReorderConfig,
+    useReorderKanbanConfig,
+} from './use-optimistic-options'
+import { useKanbanSearchParams } from 'screens/Kanban/util'
 
 export const useKanbans = (param?: Partial<Kanban>) => {
     const client = useHttp()
@@ -54,18 +59,15 @@ export interface SortProps {
 
 export const useReorderKanban = () => {
     const client = useHttp()
-    const queryClient = useQueryClient()
-
+    const queryKey = ['kanbans', useKanbanSearchParams()]
     return useMutation(
         (params: SortProps) => {
             return client('kanbans/reorder', {
                 data: params,
-                method: 'post',
+                method: 'POST',
             })
         },
-        {
-            // 把query这一给删掉,达到retry的效果
-            onSuccess: () => queryClient.invalidateQueries('kanbans'),
-        }
+        useReorderKanbanConfig(queryKey)
+        // useReorderConfig(queryKey)
     )
 }

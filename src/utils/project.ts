@@ -1,6 +1,8 @@
 import { useHttp } from 'utils/http'
 import { Project } from 'types'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
+import { useProjectsSearchParams } from 'screens/project-list/util'
+import { useConfig } from './use-optimistic-options'
 
 export const useProjects = (param?: Partial<Project>) => {
     const client = useHttp()
@@ -13,33 +15,24 @@ export const useProjects = (param?: Partial<Project>) => {
 
 export const useEditProject = () => {
     const client = useHttp()
-    const queryClient = useQueryClient()
-    // const [searchParams,setSearchParams] = useProjectsSearchParams()
-    // const queryKey=['projects',searchParams]
+    const [searchParams, setSearchParams] = useProjectsSearchParams()
+    const queryKey = ['projects', searchParams]
 
     // useMutation的第二个参数，可以用来retry
     return useMutation(
-        (params: Partial<Project>) =>
-            client(`projects/${params.id}`, {
+        (params: Partial<Project>) => {
+            return client(`projects/${params.id}`, {
                 method: 'PATCH',
                 data: params,
-            }),
-        {
-            // 把query这一给删掉,达到retry的效果
-            onSuccess: () => queryClient.invalidateQueries('projects'),
-            // mutation一发生，onMutate立即被调用，把本地缓存直接修改（无视请求有没有发生成功
-            // 但是这样就需要回滚机制
-            // async onMutate(target){
-            //     const previousItems = queryClient.getQueryData(queryKey)
-            //     queryClient.setQueryData(queryKey,(old?:Project[])=>{
-            //         return old?.map(project=>project.id===target.id?{...project,...target}:project)||[]
-            //     })
-            //     return {previousItems}
-            // },
-            // onError(error,newItem,context){
-            //     queryClient.setQueryData(queryKey,(context as {previousItems:Project[]}).previousItems)
-            // }
-        }
+            })
+        },
+        useConfig(queryKey, (target, old) => {
+            return (
+                old?.map((item) =>
+                    item.id === target.id ? { ...item, ...target } : item
+                ) || []
+            )
+        })
     )
 }
 
@@ -66,7 +59,7 @@ export const useProject = (id?: number) => {
     const client = useHttp()
     return useQuery<Project>(
         ['project', { id }],
-        () => client(`projects/${id}`),
+        () => client(`projects/${id}`, {}),
         {
             enabled: !!id,
         }

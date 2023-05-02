@@ -5,7 +5,7 @@ import { User } from 'types'
 import { useEpics } from 'utils/epic'
 import { useProjectIdInUrl } from 'screens/Kanban/util'
 
-// typepf +  componentprops获取组件上的props
+// typeof +  componentprops获取组件上的props
 export const EpicTypeSelect = (
     props: React.ComponentProps<typeof IdSelect>
 ) => {

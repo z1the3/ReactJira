@@ -8,5 +8,5 @@ export const useTaskTypes = () => {
     const client = useHttp()
 
     // 直接获取所有的tasks
-    return useQuery<TaskType[]>(['taskType'], () => client('taskTypes'))
+    return useQuery<TaskType[]>(['taskType'], () => client('taskTypes', {}))
 }

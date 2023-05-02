@@ -3,6 +3,15 @@
 import { useHttp } from 'utils/http'
 import { Task, Project } from 'types'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
+import {
+    useReorderConfig,
+    useReorderTaskConfig,
+} from './use-optimistic-options'
+import {
+    useTasksSearchParams,
+    useTasksSearchParamsPanels,
+} from 'screens/Kanban/util'
+import { useProjectsSearchParams } from 'screens/project-list/util'
 
 export const useTasks = (param?: Partial<Task>) => {
     const client = useHttp()
@@ -71,18 +80,22 @@ export interface SortProps {
 }
 export const useReorderTask = () => {
     const client = useHttp()
-    const queryClient = useQueryClient()
-
+    const queryKey = ['tasks', useTasksSearchParamsPanels()]
     return useMutation(
         (params: SortProps) => {
+            // const tail =  reorderTaskConfig.loading?  Promise.resolve()
+            // :client('tasks/reorder', {
+            //     data: params,
+            //     method: 'post',
+            // })
+
+            // return tail
             return client('tasks/reorder', {
                 data: params,
                 method: 'post',
             })
         },
-        {
-            // 把query这一给删掉,达到retry的效果
-            onSuccess: () => queryClient.invalidateQueries('tasks'),
-        }
+        useReorderTaskConfig(queryKey)
+        // useReorderConfig(queryKey)
     )
 }
